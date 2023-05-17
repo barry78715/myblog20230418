@@ -276,11 +276,11 @@
        				<h2 class="text-start ms-3 col-2" th:text="${member.name}"></h2>
 		   			<form class="col-8 d-inline">
 		   				<!-- <input type="text" id="loggedInUsername" th:value="${#authentication.name}"> -->
-		   				<input type="" id="loggedInUsername" th:value="${#authentication.name}">
-		   				<input type="" id="HPOwnerName" th:value="${member.username}">
+		   				<input type="hidden" id="loggedInUsername" th:value="${#authentication.name}">
+		   				<input type="hidden" id="HPOwnerName" th:value="${member.username}">
 						<!-- <input type="text" id="HPOwnerName" th:value="${member.username}"> -->
-		   				<input type="" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
-		   				<input type="" th:value="${ifIsFollower}" id="ifIsFollower"/>
+		   				<input type="hidden" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
+		   				<input type="hidden" th:value="${ifIsFollower}" id="ifIsFollower"/>
 		   				<button sec:authorize="hasAuthority('ROLE_USER')" id="followBtn" type="button" class="btn btn-success btn-lg me-5 col-2">追蹤</button>
 		   				<button id="unfollowBtn" type="button" class="btn btn-secondary btn-lg me-5 col-2">已追蹤</button>
 					</form>
