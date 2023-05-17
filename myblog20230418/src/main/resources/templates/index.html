@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" 
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" th:href="@{/img/codingstray-website-favicon-color.png}"/>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+   
+    <script th:src="@{/js/jquery3.6.0.min.js}"></script>
+
+    <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}">
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300&family=Poppins:wght@300&display=swap}" rel="stylesheet">
+    <script th:src="@{https://kit.fontawesome.com/5748abe29e.js}"></script>
+
+    <script th:src="@{/js/ckeditor/ckeditor.js}"></script>
+    
+    <link rel="stylesheet" th:href="@{https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.css}" />
+    <script th:src="@{https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js}"></script>
+   
+    <style th:inline="text">
+      .bg-green {
+          background-color: #a3e6c3;
+          box-shadow: 0px 3px 8px 0px #000;
+      }
+      .navbar {
+        min-height: 80px;
+      }
+      body {
+        background-color: #d8efe3;
+        padding-top: 65px; 
+        font-family: 'Noto Serif TC', serif;
+      }
+
+      ::placeholder {
+        color: gray !important;
+        opacity: .4;
+      }
+
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: gray !important;
+      }
+
+      ::-ms-input-placeholder { /* Microsoft Edge */
+        color: gray !important;
+      }
+
+      .iconClass{
+        position: relative;
+      }
+
+      .iconClass span{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        display: block;
+      }
+      
+      .form-control-placeholder {
+        color: gray;
+      }
+
+      .dropdown-menu {
+        min-width: 300px;
+      }
+      .noteContent{
+        word-break:normal; 
+        width: 250px; 
+        display: block; 
+        white-space: pre-wrap;
+        word-wrap : break-word ;
+        overflow: hidden ;
+      }  
+      .note {
+        border-bottom: 1px solid rgb(180, 177, 177);
+      }
+
+      .searchBar {
+        position: relative;
+      }
+
+      #searchHintList {
+        position: absolute;
+        top: 35px;
+      }
+
+      .tagSlides {
+        object-fit: cover;
+      }
+
+      .tagSlides img, .swiper-slide{
+        filter: sepia(50%);
+      }
+
+      .fa-heart, .fa-eye {
+        color: #1fb870;
+      }
+      
+      footer {
+      	background-color: #eef5f2;
+      }
+      
+      a {
+      	cursor: pointer;
+      }
+  
+
+
+    </style>
+    <title>CodingStray</title>
+</head>
+<body>
+  <!-- navbar -->
+  <div class="container shadow-sm">
+  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-green">
+    <div class="container-fluid">
+      <!-- brand name and icon -->
+      <a class="navbar-brand fs-3 text-success bd-highlight" th:href="@{/}">
+          <img src="./img/codingstray-website-favicon-color.png" width="50" height="" class="d-inline">CODINGSTRAY
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <!-- search input and button -->
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <form class="searchBar d-flex mx-auto w-50">
+          <input class="searchInput form-control me-3" type="search" placeholder="搜尋..." aria-label="Search" id="searchKey" style="width: 100% !important;">
+          <ul class="dropdown-menu" id="searchHintList" style="width: 87% !important;">
+
+          </ul>
+          <button class="btn btn-success" type="submit"><i class="fas fa-search" style="padding-left: 10px; padding-right: 10px;"></i></button>
+        </form>
+
+        <ul class="navbar-nav ms-auto">
+          <!-- new post -->
+          <!-- sec:authorize="hasAuthority('ROLE_USER')"  -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="#" id="newPost" class="nav-link nav-icon iconClass" data-bs-toggle="modal" data-bs-target="#postModal">
+              <i class="fa-solid fa-pen fa-2x"></i>
+              <input type="hidden" th:value="${_csrf.token}" name="${_csrf.parameterName}" th:if="${_csrf}" id="csrfTokenPic"/>
+            </a>
+          </li>
+
+          <!-- notification -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="#" class="nav-link nav-icon iconClass" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false" onclick="$('#notNum').remove();">
+              <i class="fas fa-bell fa-2x"></i>
+              <span id="notNum" class="badge rounded-pill bg-danger">2</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end w-30" aria-labelledby="dropdown01" id="noteList">
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i></a>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man1.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg1</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i></a>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man2.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg2</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i></a>
+              </li>
+            </ul>
+          </li>
+          
+          <li class="nav-item dropdown me-3 my-auto">
+            <a href="#" class="nav-link nav-icon iconClass" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+              <i class="fa-solid fa-user fa-2x"></i>
+            </a>
+           
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+  
+
+  <!-- Modal For New Post -->
+  <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postModalLabel">新文章</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form th:action="@{/saveArticle}" th:object="${article}" method="post">
+            <div class="mb-3">
+              <label for="postInputtag1" class="form-label">分類</label>
+              <select th:field="*{t.TID}" id="postTags" class="form-control form-control-placeholder" aria-label="postInputtag1">
+              	<option value="-1" selected hidden="true">請選擇分類</option>
+                <option th:each="tag: ${tl}" th:text="${tag.TName}" th:value="${tag.TID}" style="color:black"></option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="postInputtitle1" class="form-label">標題</label>
+              <input th:field="*{ATitle}" type="text" class="form-control" id="postInputtitle1">
+            </div>
+            <div class="mb-3">
+              <label for="postInputContent1" class="form-label">內文</label>
+              <textarea th:field="*{AContent}" class="form-control" id="postInputContent1" rows="7"></textarea>
+            </div>
+            <sec:input>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success mx-auto">發表文章</button>
+          </div>
+          </form>
+        </div>
+      </div>
+  </div>
+  </div>
+
+
+
+<!-- offcanvas sidebar -->
+
+
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light offcanvas offcanvas-end" style="width: 280px;" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+    <span class="fs-4"></span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li sec:authorize="isAnonymous()"  class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-right-to-bracket fa-lg me-3"></i><span class="ms-1">登入</span>
+      </a>
+    </li>
+    <li sec:authorize="isAnonymous()" class="nav-item">
+      <a th:href="@{/register}" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-regular fa-id-card fa-lg me-3"></i><span>註冊</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a id="goMemberHP" th:href="@{'/memberHP/'+${userID}}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-house fa-lg me-3"></i><span>個人主頁</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-clipboard fa-lg me-3 ms-1"></i><span class="ms-1">修改資料</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+
+      <a id="logoutBtn" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-solid fa-right-from-bracket fa-lg me-3 ms-1"></i><span>登出</span>
+      </a>
+      <form id="logout-form" th:action="@{/logout}" method="post">
+  		<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+	 </form>
+   
+    </li>
+  </ul>
+  <hr>
+</div>
+<div class="tagSlides container-fluid">
+  <div id="carouselExampleCaptions" class="carousel slide mx-auto" data-bs-ride="carousel" >
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active" data-bs-interval="3000" style="height:150px">
+        <a href="./testlink/article1.html"><img src="./img/img1.jpg" class="d-block rounded w-100 img-thumbnail"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>First slide label</h5>
+          <p>Some representative placeholder content for the first slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item" data-bs-interval="3000" style="height:150px">
+        <a href="./testlink/article2.html"><img src="./img/img2.jpg" class="d-block rounded w-100 img-thumbnail"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Second slide label</h5>
+          <p>Some representative placeholder content for the second slide.</p>
+        </div>
+      </div>
+      <div class="carousel-item" data-bs-interval="3000"style="height:150px" >
+        <a href="./testlink/article3.html"><img src="./img/img3.jpg" class="d-block rounded w-100 img-thumbnail"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Third slide label</h5>
+          <p>Some representative placeholder content for the third slide.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid" style="padding-top: 1%">
+        <div class="swiper-button-prev" style="color: white"></div>
+        <div class="swiper-button-next" style="color: white"></div>
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper" style="display: flex; flex-wrap: nowrap;">
+            <div th:each="tag, idx: ${tl}" class="swiper-slide" style="flex: 0 0 20%; max-width: 20%;">
+            	<a type="button" data-bs-toggle="modal" th:data-bs-target="${'#tagModal'+idx.index}">
+            		<img class="img-fluid rounded border border-3" th:src="${tag.TPic}">
+            	</a>
+            </div>
+          </div>
+        </div>
+       
+</div>
+
+	 <div th:each="tag, idx: ${tl}" class="modal fade" th:id="${'tagModal'+idx.index}" tabindex="-1" th:aria-labelledby="${'tagModalLabel'+idx.index}" aria-hidden="true">
+   				<div class="modal-dialog modal-dialog-centered">
+   			  	<div class="modal-content">
+   			    <div class="modal-header">
+    				<h5 class="modal-title" th:id="${'tagModalLabel'+idx.index}" th:text="${'#'+tag.TName}"></h5>
+    			    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    			</div>
+    			<div class="modal-body">
+	    			<table class="table table-hover fs-3">
+	    				<tr class="text-center text-success" th:each="a: ${alByTag[idx.index]}">
+	    			   		<td th:if="${a != null}" th:utext="${'<a href='+ '/post/'+ a.AID +'>' + a.ATitle+'</a>'}"></td>
+	    			   	</tr>
+	 				</table>
+    			</div>
+    			<div class="modal-footer"></div>
+     			</div>
+	  			</div>
+	  </div>
+
+<div class="container mt-3">
+  <br>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="#Hot" style="color: rgb(34, 81, 34);">熱門作者</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#menu1" style="color: rgb(34, 81, 34);">最多觀看</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div id="Hot" class="container tab-pane active"><br>
+      <div class="inner p-2 border text-success">
+          <div class="container ">
+              <div class="row">
+                  <div class="col-6 " >
+                      <table class="table text-center" >
+                          <thead>
+                              <tr>
+                                  <th class="col-1"></th>
+                                  <th class="col-3">會員帳號</th>
+                                  <th class="col-4">讚數</th>
+                                  <th class="col-4">觀看數</th>
+                              </tr>
+                          </thead>
+                          <tbody class=" text-primary text-center" style="vertical-align: middle" >
+                              <tr class="col"  >
+                                  <td class="col">
+                                      1
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1IZuH5zEJBQnTmfKkfXQmLcuOZxAHe9Rr" alt="pic">
+                                      ksad1231
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 331</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 45,661</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      2
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=12rK0WMDW2gDFhwnp3U0KK5JVYp0fF-j3" alt="pic">
+                                      Allen1911
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 7984</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 19,151</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      3
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1oiKWwBdfVr75DV8Ly6kiRm2rRi4sSeBk" alt="pic">
+                                      Nyy2245
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 613</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 11,121</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      4
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=16WGvEcjs9_loSLRxiKHJaaShgaUIHZg1" alt="pic">
+                                      kk321
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 43</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 9,613</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      5
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1ibMkbmeN4_wGYgRGNLd4B4Bp5kERgW9t" alt="pic">
+                                      Bunny1423
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 595</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 9,311</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="col-6 " >
+                      <table class="table table-hover text-center" >
+                          <thead>
+                              <tr>
+                                  <th class="col-1"></th>
+                                  <th class="col-3">會員帳號</th>
+                                  <th class="col-4">讚數</th>
+                                  <th class="col-4">觀看數</th>
+                              </tr>
+                          </thead>
+                          <tbody class=" text-primary text-center" style="vertical-align: middle" >
+                              <tr class="col"  >
+                                  <td class="col">
+                                      6
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1r3DTWGJu3Zd_Q6i_NxFq0bWO1V88uaVH" alt="pic">
+                                      eric11951
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 299</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 7,411</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      7
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1uDtoWzJfEdej8Sraw8o-lwWtnv_RlHuu" alt="pic">
+                                      A88321
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 13</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 4,921</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      8
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1Fww7onO2G8L_aNkobN5VfAhI7LS3R8NB" alt="pic">
+                                      Agodsd10988
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 58</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 1,911</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      9
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1T61xpnyBFS4wjnIMl8EKedrEVBGTQtVf" alt="pic">
+                                      L4498s822
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 590</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 1,331</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      10
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1KP6A_WZ7AX1e6QV_hoholb6bWskG-wld" alt="pic">
+                                      esdfas1411
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 302</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 611</td>
+                              </tr>
+                          </tbody>
+                      </table>
+
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+    <div id="menu1" class="container tab-pane fade"><br>
+      <div class="inner p-2 border" >
+          <div class="container">
+              <div class="row" >
+                  <div class="col-6 " >
+                      <table class="table table-hover text-center" >
+                          <thead>
+                              <tr>
+                                  <th class="col-1"></th>
+                                  <th class="col-3">會員帳號</th>
+                                  <th class="col-4">讚數</th>
+                                  <th class="col-4">觀看數</th>
+                              </tr>
+                          </thead>
+                          <tbody class=" text-primary text-center" style="vertical-align: middle" >
+                              <tr class="col"  >
+                                  <td class="col">
+                                      1
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=12rK0WMDW2gDFhwnp3U0KK5JVYp0fF-j3" alt="pic">
+                                      Allen1911
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 7984</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 19,151</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      2
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1oiKWwBdfVr75DV8Ly6kiRm2rRi4sSeBk" alt="pic">
+                                      Nyy2245
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 613</td>
+                                  <td class="col"><i class="fa-solid fa-eye"></i> 11,121</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      3
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1ibMkbmeN4_wGYgRGNLd4B4Bp5kERgW9t" alt="pic">
+                                      Bunny1423
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 595</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 9,311</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      4
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1T61xpnyBFS4wjnIMl8EKedrEVBGTQtVf" alt="pic">
+                                      L4498s822
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm"></i> 590</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 1,331</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      5
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1IZuH5zEJBQnTmfKkfXQmLcuOZxAHe9Rr" alt="pic">
+                                      ksad1231
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 331</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 45,661</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+                  <div class="col-6 " >
+                      <table class="table table-hover text-center" >
+                          <thead>
+                              <tr>
+                                  <th class="col-1"></th>
+                                  <th class="col-3">會員帳號</th>
+                                  <th class="col-4">讚數</th>
+                                  <th class="col-4">觀看數</th>
+                              </tr>
+                          </thead>
+                          <tbody class=" text-primary text-center" style="vertical-align: middle" >
+                              <tr class="col"  >
+                                  <td class="col">
+                                      6
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1KP6A_WZ7AX1e6QV_hoholb6bWskG-wld" alt="pic">
+                                      esdfas1411
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 302</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 611</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      7
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1r3DTWGJu3Zd_Q6i_NxFq0bWO1V88uaVH" alt="pic">
+                                      eric11951
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 299</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 7,411</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      8
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1Fww7onO2G8L_aNkobN5VfAhI7LS3R8NB" alt="pic">
+                                      Agodsd10988
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 58</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 1,911</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      9
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=16WGvEcjs9_loSLRxiKHJaaShgaUIHZg1" alt="pic">
+                                      kk321
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 43</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 9,613</td>
+                              </tr>
+                              <tr class="col"  >
+                                  <td class="col">
+                                      10
+                                  </td>
+                                  <td class="col"style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                      <img class="img-fluid rounded w-50 img-thumbnail" src="https://drive.google.com/uc?export=view&id=1uDtoWzJfEdej8Sraw8o-lwWtnv_RlHuu" alt="pic">
+                                      A88321
+                                  </td>
+                                  <td class="col align-content-lg-center"><i class="fa-regular fa-heart fa-beat fa-sm" ></i> 13</td>
+                                  <td class="col"><i class="fa-solid fa-eye" ></i> 4,921</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>    
+      </div>
+    </div>
+	</div>
+</div>
+
+  <footer class="navbar-fixed-bottom py-4">
+    <div class="container-fluid">
+    <div class="d-flex justify-content-center">
+      <span class="text-muted">&copy; 2023 CODINGSTRAY, Inc</span>
+    </div>
+    </div>
+  </footer>
+
+
+<script type="text/javascript">
+ 
+
+  
+
+  var notes = [
+      { img: "./img/stick-man.png", notContents: "通知內容0"},
+      { img: "./img/stick-man1.png", notContents: "通知內容1" },
+      { img: "./img/stick-man2.png", notContents: "通知內容2" },
+      { img: "./img/stick-man3.png", notContents: "通知內容3" },
+      { img: "./img/stick-man4.png", notContents: "通知內容4" },
+      { img: "./img/stick-man5.png", notContents: "通知內容5" }
+    ];
+
+  function renewNotes(noteList) {
+    $('#noteList').empty();
+    $('#notNum').html(noteList.length);
+  
+    for (var i = 0; i < noteList.length; i++) {
+      var n = noteList[i];
+      $('#noteList').append(`
+      <li class="note" style="display: flex; align-items: center;">
+        <img class="ms-2" src=`+ n.img +` style="padding-top: 1px; padding-bottom: 2px; width: 50px; height: auto;">
+        <a class="dropdown-item" href="#" style="flex: 1;">
+          <span class="noteContent">`+ n.notContents +`</span>
+        </a>
+        <a id="delIcon" value=`+ i +` href="#" onclick="rmThisNote(event, this, notes);"><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+      </li>
+      `);
+    };
+  
+  };
+
+
+  function rmThisNote(event, noteDel, noteList){
+    event.stopPropagation();
+    var i = $(noteDel).val();
+    $(noteDel).parent(".note").remove();
+    noteList.splice(i, 1);
+    if(noteList.length == 0){
+      $('#noteList').append(`
+        <li class="note" style="display: flex; align-items: center;">
+          <a class="dropdown-item" href="#" style="flex: 1; text-align: center;">
+            <span class="noteContent" style="color:gray">沒有新的通知了</span>
+          </a>
+        </li>
+        `);
+    };
+  };
+
+  var timer = null;
+
+  function searchHint(){
+    clearTimeout(timer);
+    if($("#searchKey").val().trim().length == 0){
+      $("#searchHintList").css("display", "none");
+      return
+    }
+    $("#searchHintList").empty();
+    timer = setTimeout(searchHintTest, 800);
+  };
+
+  function searchHintTest(){
+    var sr = [1, 12, 123, 1234];
+    for(var i = 0; i < sr.length; i++){
+      $("#searchHintList").css("display", "block");
+      $("#searchHintList").append(`
+      <li class="searchHint list-group-item-action list-group-item-success" onclick="setVal(this);" id="searchHint`+ i +`">`+ sr[i] +`</li>
+      `)
+    };
+  };
+
+  function logout(){
+	  		
+      $("#logout-form").submit(); 
+
+
+
+	}
+
+  function setVal(searchHint){
+    $("#searchKey").val($(searchHint).text());
+    $("#searchHintList").css("display", "none");
+    clearTimeout(timer);
+  }
+
+	function runSwiper(){
+		  var mySwiper = new Swiper('.swiper', {
+	  	  // 橫向輪播
+	  	  direction: 'horizontal',
+	  	  // 一次顯示五個圖片
+	  	  slidesPerView: 5,
+	  	  // 一次滑動五個圖片
+	  	  slidesPerGroup: 5,
+	  	  // 自動輪播
+	  	  autoplay: {
+	  	    delay: 5000,
+	  	  },
+	  	  // 左右箭頭
+	  	  navigation: {
+	  	    nextEl: '.swiper-button-next',
+	  	    prevEl: '.swiper-button-prev',
+	  	  },
+	  	  // 反彈效果
+	  	  resistance: true,
+	  	  // 邊緣彈跳
+	  	  resistanceRatio: 0.2,
+	  	  // 滑鼠移入停止自動輪播
+	  	  on: {
+	  	    mouseenter: function() {
+	  	      mySwiper.autoplay.stop();
+	  	    },
+	  	    mouseleave: function() {
+	  	      mySwiper.autoplay.start();
+	  	    },
+	  	  },
+	  	});
+
+	  $(function(){
+	      $('.swiper-slide').mouseenter(function() {
+	      $(this).css('transform', 'scale(1.2)');
+	      });
+	      $('.swiper-slide').mouseleave(function() {
+	       $(this).css('transform', 'scale(1)');
+	      });
+	  })
+  }
+
+  function events(){	
+    $("#dropdown01").click(renewNotes(notes));
+    $("#logoutBtn").click(logout);
+    $("#searchKey").on("input", searchHint);
+    runSwiper();
+    CKEDITOR.replace('postInputContent1');
+    
+  };
+
+  $(document).ready(events);
+
+  
+
+</script>
+    
+</body>
+</html>

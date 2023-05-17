@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員登入</title>
+  <link rel="shortcut icon" type="image/png" th:href="@{/img/codingstray-website-favicon-color.png}"/>
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" id="bootstrap-css">
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/js/jquery3.6.0.min.js}"></script>
+  <script th:src="@{/js/jquery.cookie.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+  <!------ Include the above in your HEAD tag ---------->
+</head>
+<body>
+
+
+<div class="wrapper fadeInDown">
+  <div id="formContent">
+    <a class="navbar-brand fs-3 text-success bd-highlight" href="#">
+      <img th:src="@{/img/codingstray-website-favicon-color.png}" width="50" height="" class="d-inline">CODINGSTRAY
+    </a>
+  
+
+  
+    <!-- Login Form -->
+    <form th:action="@{/perform_login}" method="post">
+      <input type="text" id="login" class="fadeIn second" name="username" placeholder="帳號">
+      <input type="password" id="password" class="fadeIn third" name="password" placeholder="密碼">
+      <!-- <input th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/> -->
+      <input type="hidden" name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+      <input type="submit" class="fadeIn fourth" value="登  入">
+    </form>
+
+    <!-- Remind Passowrd -->
+    <div id="formFooter">
+      <a class="underlineHover" href="#">忘記密碼?</a>
+    </div>
+    
+    
+  
+  </div>
+</div>
+  
+</body>
+</html>

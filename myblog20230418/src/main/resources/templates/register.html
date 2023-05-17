@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員註冊</title>
+  <link rel="shortcut icon" type="image/png" th:href="@{/img/codingstray-website-favicon-color.png}"/>
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" id="bootstrap-css">
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/js/jquery3.6.0.min.js}"></script>
+  <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js}"></script>
+<link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.css}" rel="stylesheet"></link>
+  <link rel="stylesheet" th:href="@{/css/register.css}">
+  <!------ Include the above in your HEAD tag ---------->
+</head>
+<body>
+    <div class="wrapper">
+        <div ></div>
+        <form class="form-right" th:action="@{/saveMember}" th:object="${member}" method="POST">
+            <h2 class="text-success"><img th:src="@{/img/codingstray-website-favicon-color.png}" width="50" height="" class="d-inline">註冊會員</h2>
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label>暱稱</label>
+                    <input th:field="*{name}" type="text" name="name" id="name" class="input-field" placeholder="暱稱"> 
+                    <!-- minlength="2" maxlength="10 "-->
+                </div>
+            </div> 
+            <div class="mb-3">
+                <label>帳號</label>
+                <input th:field="*{username}" type="username" class="input-field" name="username" placeholder="帳號">
+                <!-- minlength="6" maxlength="10"> -->
+            </div>
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label>密碼</label>
+                    <input th:field="*{password}" type="password" name="pwd" id="pwd" class="input-field" placeholder="密碼">
+                    <!--minlength="6" maxlength="10"-->
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label>再次輸入密碼</label>
+                    <input type="password" name="cpwd" id="cpwd" class="input-field" placeholder="再次輸入密碼">
+                    <!-- minlength="6" maxlength="10">-->
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label>生日</label>
+                    <input th:field="*{birthday}" type="date" name="Birthday" id="Birthday" class="input-field" th:datetime="${#dates.format(birthday, 'yyyy-MM-dd')}" placeholder="生日">
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label>性別</label>
+                    <input th:field="*{gender}" type="radio" name="sex" th:value="male" />男<br />
+                    <input th:field="*{gender}" type="radio" name="sex" th:value="female" />女<br />
+                </div>
+               	
+                <div class="mb-3">
+	                <label class="option">我同意以下</a><a href="https://www.youtube.com/">使用者服務條款</a>
+	                    <input th:field="*{authority}" type="checkbox" checked th:value="user_roles">
+	                    <span class="checkmark"></span>
+	                </label>
+            	</div>
+            	
+            	<div class="col-sm-6 mb-3">
+            		<label>頭像</label>
+                    <input type="file" name="image" id="upload_img" class="input-field" placeholder="image" accept="image/*">
+					<div id="oldImg" style="display:none;"></div>
+				</div>
+				<div class="col-sm-6 mb-3">
+					<label>預覽</label>
+					<button class="input-field" id="crop_img"><i class="fa fa-scissors"></i> 裁剪圖片</button>
+					<div id="newImgInfo"></div>
+					<div id="newImg"></div>
+					<input type="hidden" id="imageData" name="imageData">
+				</div>
+            </div>
+            
+            <div class="form-field d-inline">
+                <input type="submit" value="確定" class="register" name="register">
+            </div>
+            
+            
+            
+           
+
+<script>
+(function($) {
+	var width_crop = 300, // 圖片裁切寬度 px 值
+		height_crop = 300, // 圖片裁切高度 px 值
+		type_crop = "square", // 裁切形狀: square 為方形, circle 為圓形
+		width_preview = 350, // 預覽區塊寬度 px 值
+		height_preview = 350, // 預覽區塊高度 px 值
+		compress_ratio = 0.85, // 圖片壓縮比例 0~1
+		type_img = "jpeg", // 圖檔格式 jpeg png webp
+		oldImg = new Image(),
+		myCrop, file, oldImgDataUrl;
+
+		// 裁切初始參數設定
+		myCrop = $("#oldImg").croppie({
+										viewport: { // 裁切區塊
+											width: width_crop,
+											height: height_crop,
+											type: type_crop
+										},
+										boundary: { // 預覽區塊
+											width: width_preview,
+											height: height_preview
+										}
+});
+
+function readFile(input) {
+	if (input.files && input.files[0]){
+		file = input.files[0];
+	} else {
+		alert("瀏覽器不支援此功能！建議使用最新版本 Chrome");
+		return;
+	}
+
+	if (file.type.indexOf("image") == 0) {
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			oldImgDataUrl = e.target.result;
+			oldImg.src = oldImgDataUrl; // 載入 oldImg 取得圖片資訊
+			myCrop.croppie("bind", {
+				url: oldImgDataUrl
+			});
+		};
+		reader.readAsDataURL(file);
+	} else {
+		alert("您上傳的不是圖檔！");
+	}
+}
+
+function displayCropImg(src) {
+	var html = "<img src='" + src + "' />";
+	$("#newImg").html(html);
+}
+
+$("#upload_img").on("change",function() {
+			$("#oldImg").show();
+			readFile(this);
+		});
+
+oldImg.onload = function() {
+	var width = this.width,
+		height = this.height,
+		fileSize = Math.round(file.size / 1000),
+		html = "";
+
+	html += "<p>原始圖片尺寸 " + width + "x" + height + "</p>";
+	html += "<p>檔案大小約 " + fileSize + "k</p>";
+	$("#oldImg").before(html);
+};
+
+function displayNewImgInfo(src) {
+	var html = "",
+		filesize = src.length * 0.75;
+
+	html += "<p>裁切圖片尺寸 " + width_crop + "x" + height_crop + "</p>";
+	html += "<p>檔案大小約 " + Math.round(filesize / 1000) + "k</p>";
+	$("#newImgInfo").html(html);
+}
+
+$("#crop_img").on("click", function() {
+	event.preventDefault();
+	myCrop.croppie("result", {
+		type: "canvas",
+		format: type_img,
+		quality: compress_ratio
+	}).then(function(src) {
+		displayCropImg(src);
+		displayNewImgInfo(src);
+		$("#imageData").val(src);
+		});
+	});
+})(jQuery);
+</script>
+            
+            
+        </form>
+    </div>
+</body>
+
+</html>

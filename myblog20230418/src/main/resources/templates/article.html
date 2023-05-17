@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" 
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="./img/codingstray-website-favicon-color.png"/>
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+  <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/js/jquery3.6.0.min.js}"></script>
+  <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
+  <link rel="preconnect" th:href="@{https://fonts.gstatic.com}" crossorigin>
+  <link th:href="@{https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300&family=Poppins:wght@300&display=swap}" rel="stylesheet">
+  <script th:src="@{https://kit.fontawesome.com/5748abe29e.js}" crossorigin="anonymous"></script>
+  <script th:src="@{/js/ckeditor/ckeditor.js}"></script>
+  <style th:inline="text">
+  	  a {
+  		cursor: pointer;
+	  }
+      .bg-green{
+          background-color: #a3e6c3;
+          box-shadow: 0px 3px 8px 0px #000;
+      }
+      .navbar {
+        min-height: 80px;
+      }
+      body {
+        background-color: #d8efe3;
+        padding-top: 85px; 
+        font-family: 'Noto Serif TC', serif;
+      }
+
+      ::placeholder {
+        color: gray !important;
+        opacity: .4;
+      }
+
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: gray !important;
+      }
+
+      ::-ms-input-placeholder { /* Microsoft Edge */
+        color: gray !important;
+      }
+
+      .iconClass{
+        position: relative;
+      }
+
+      .iconClass span{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        display: block;
+      }
+      
+      .form-control-placeholder {
+        color: gray;
+      }
+
+      .dropdown-menu {
+        min-width: 300px;
+      }
+      .noteContent{
+        word-break:normal; 
+        width: 250px; 
+        display: block; 
+        white-space: pre-wrap;
+        word-wrap : break-word ;
+        overflow: hidden ;
+      }  
+      .note {
+        border-bottom: 1px solid rgb(180, 177, 177);
+      }
+
+      .searchBar {
+        position: relative;
+      }
+
+      #searchHintList {
+        position: absolute;
+        top: 35px;
+	  }
+	   .fa-heart, .fa-eye {
+        color: #1fb870;
+      }
+      
+       footer {
+      	background-color: #eef5f2;
+      }
+  </style>
+  <title th:text="${article.ATitle}"></title>
+</head>
+
+<body>
+<!-- navbar -->
+  <div class="container shadow-sm">
+  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-green">
+    <div class="container-fluid">
+      <!-- brand name and icon -->
+      <a class="navbar-brand fs-3 text-success bd-highlight" th:href="@{/}">
+          <img th:src="@{/img/codingstray-website-favicon-color.png}" width="50" height="" class="d-inline">CODINGSTRAY
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <!-- search input and button -->
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <form class="searchBar d-flex mx-auto w-50">
+          <input class="searchInput form-control me-3" type="search" placeholder="搜尋..." aria-label="Search" id="searchKey" style="width: 100% !important;">
+          <ul class="dropdown-menu" id="searchHintList" style="width: 87% !important;">
+
+          </ul>
+          <button class="btn btn-success" type="submit"><i class="fas fa-search" style="padding-left: 10px; padding-right: 10px;"></i></button>
+        </form>
+
+        <ul class="navbar-nav ms-auto">
+          <!-- new post -->
+          <!-- sec:authorize="hasAuthority('ROLE_USER')"  -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="" id="newPost" class="nav-link nav-icon iconClass" data-bs-toggle="modal" data-bs-target="#postModal">
+              <i class="fa-solid fa-pen fa-2x"></i>
+              <input type="hidden" th:value="${_csrf.token}" name="${_csrf.parameterName}" th:if="${_csrf}" id="csrfTokenPic"/>
+            </a>
+          </li>
+
+          <!-- notification -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="#" class="nav-link nav-icon iconClass" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false" onclick="$('#notNum').remove();">
+              <i class="fas fa-bell fa-2x"></i>
+              <span id="notNum" class="badge rounded-pill bg-danger">2</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end w-30" aria-labelledby="dropdown01" id="noteList">
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man1.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg1</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man2.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg2</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+            </ul>
+          </li>
+          
+          <li class="nav-item dropdown me-3 my-auto">
+            <a href="#" class="nav-link nav-icon iconClass" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+              <i class="fa-solid fa-user fa-2x"></i>
+            </a>
+           
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+  
+
+  <!-- Modal For New Post -->
+  <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postModalLabel">新文章</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newPost" th:action="@{/saveArticle}" th:object="${newPost}" method="post">
+            <div class="mb-3">
+              <label for="postInputtag1" class="form-label">分類</label>
+               <select th:field="*{t.TID}" id="postTags" class="form-control form-control-placeholder" aria-label="postInputtag1">
+              	<option value="-1" selected hidden="true">請選擇分類</option>
+                <option th:each="tag: ${tl}" th:text="${tag.TName}" th:value="${tag.TID}" style="color:black"></option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="postInputtitle1" class="form-label">標題</label>
+              <input th:field="*{ATitle}" type="text" class="form-control" id="postInputtitle1">
+            </div>
+            <div class="mb-3">
+              <label for="postInputContent1" class="form-label">內文</label>
+              <textarea th:field="*{AContent}" class="form-control" id="postInputContent1" rows="7"></textarea>
+            </div>
+            <sec:input>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success mx-auto">發表文章</button>
+          </div>
+          </form>
+        </div>
+      </div>
+  </div>
+  </div>
+
+
+
+
+
+<!-- offcanvas sidebar -->
+
+
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light offcanvas offcanvas-end" style="width: 280px;" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+    <span class="fs-4"></span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li sec:authorize="isAnonymous()"  class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-right-to-bracket fa-lg me-3"></i><span class="ms-1">登入</span>
+      </a>
+    </li>
+    <li sec:authorize="isAnonymous()" class="nav-item">
+      <a th:href="@{/register}" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-regular fa-id-card fa-lg me-3"></i><span>註冊</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a id="goMemberHP" th:href="@{'/memberHP/'+${userID}}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-house fa-lg me-3"></i><span>個人主頁</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-clipboard fa-lg me-3 ms-1"></i><span class="ms-1">修改資料</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a th:href="@{/logout}" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-solid fa-right-from-bracket fa-lg me-3 ms-1"></i><span>登出</span>
+      </a>
+    </li>
+  </ul>
+  <hr>
+</div>
+ 
+  <div class="container-fluid d-flex mx-auto">
+  
+    <div class="col-md-8 mx-auto">
+      <h3 th:text="${article.t.TName}" class="pb-4 mb-4 fst-italic border-bottom"></h3>
+      <article class="blog-post">
+        <h2 th:text="${article.ATitle}" class="blog-post-title"></h2>
+    	<p th:text="${article.ADate}" class="blog-post-meta" style="display: inline;"></p><a class="ms-2" th:href="@{'/memberHP/'+${article.m.id}}" th:text="${article.m.name}" style="display: inline;">author</a>
+	
+        <div class="mt-4" th:utext="${article.AContent}"></div>
+        <div class="likesAndViews">
+        	<a id="likeBtn" class="me-3" href=""><i class="fa-regular fa-heart fa-sm"></i></a>
+        	<a id="unlikeBtn" class="me-3" href=""><i class="fa-solid fa-heart fa-sm"></i></a>
+        	<span id="likeCount" class="me-3" th:text="${article.ALike}"></span>
+        	<span id="newlikeCount" class="me-3"></span>
+			<i class="fa-solid fa-eye fa-sm me-3"></i>
+			<span class="me-3" th:text="${article.AView}"></span>
+        </div>
+        <form>
+	        <input type="hidden" id="loggedInUsername" sec:authorize="isAuthenticated()" th:value="${#authentication.name}">
+	        <input type="hidden" id="AID" sec:authorize="isAuthenticated()" th:value="${article.AID}">
+	        <input type="hidden" id="ifLiked" th:value="${ifLiked}">
+	        <input type="" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
+        </form>
+        <div id="comments">
+            <h4 class="mt-3">留言區</h4>
+            <ul class="list-group" id="commentList">
+            	<li class="list-group-item list-group-item-success" th:each="c, idx: ${cl}">
+	            	<div class="container-fluid">
+	            		<div class="row justify-content-between">
+	            		<div class="row col-3">
+	            			<img class="col-4 pb-3" th:src="${cml[idx.index].Pic}">
+	            			<h4 class="cMName col-8" th:text="${cml[idx.index].name}"></h4>
+	            		</div>
+	            		<div class="col-1">
+	            			<a class="cLikeBtn me-2" th:id="${'cLikeBtn'+idx.index}"><i class="fa-regular fa-heart fa-sm"></i></a>
+	            			<a class="cUnlikeBtn me-2" th:id="${'cUnlikeBtn'+idx.index}"><i class="fa-solid fa-heart fa-sm"></i></a>
+	            			<small class="clikeCount" th:id="${'clikeCount'+idx.index}" th:text="${c.CLikes}"></small>
+	            		</div>
+	            		<div class="row">
+	            			<p class="cContent ms-5" th:text="${c.CContent}"></p>
+	            		</div>
+	            		</div>
+	            		<div class="row">
+	            			<small class="cTime" th:text="${#temporals.format(c.CTime, 'yyyy-MM-dd HH:mm:ss')}" style="font-size: 10;"></small>
+	            		</div>
+	            	</div>
+	            	<input class="commentID" th:id="${'commentID'+idx.index}" th:value="${c.CID}">
+	            	<input class="cMID" th:id="${'cMID'+idx.index}" th:value="${userID}">
+	            	<input class="ifCommentLiked" th:id="${'ifCommentLiked'+idx.index}" th:value="${ifCommentLikedList[idx.index]}">
+            	</li>
+            </ul>
+          </div>
+          <hr>
+          <input type="" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
+        <form>
+        <div class="mb-3">
+          <label class="form-label">Comment</label>
+          <textarea class="form-control" id="cContent" placeholder="輸入留言" rows="3" required></textarea>
+        </div>
+	        <input id="cMID" th:value="${userID}">
+	        <input id="cSubmitTime">
+	        <input id="cAID" th:value="${article.AID}">
+	        <input type="" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
+	        <button type="button" class="btn btn-success" id="cSubmitBtn">送出</button>
+        </form>
+      </article>
+    </div>
+  
+</div>
+ <footer class="navbar-fixed-bottom py-4 mt-4">
+    <div class="container-fluid">
+    <div class="d-flex justify-content-center">
+      <span class="text-muted">&copy; 2023 CODINGSTRAY, Inc</span>
+    </div>
+    </div>
+  </footer>
+    
+    <script type="text/javascript">
+        function submitComment() {
+          // 取得輸入留言框的文字內容
+          var commentText = document.getElementById("comment").value;
+        
+          // 建立新的留言列表項目
+          var commentItem = document.createElement("li");
+          var commentContent = document.createTextNode(commentText);
+          commentItem.appendChild(commentContent);
+        
+          // 將留言列表項目加入留言區
+          var commentList = document.querySelector("#comments ul");
+          commentList.appendChild(commentItem);
+        
+          // 清空輸入留言框的文字內容
+          document.getElementById("comment").value = "";
+        }
+        
+        function like(){
+        	var formData = {
+        		loggedInUsername: $("#loggedInUsername").val(),
+        		AID: $("#AID").val()
+        	}
+        	event.preventDefault();
+        	$.ajax({
+        	    type: "POST",
+        	    url: "/post/like",
+        	    data: JSON.stringify(formData),
+        	    processData: false,
+        	    contentType: "application/json;charset=UTF-8",
+        	    beforeSend: function(xhr) {
+        	        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+        	    },
+        	    success: function(data) {
+        	      var newLikeCount = parseInt($("#likeCount").text()) + 1;
+        	      $("#likeCount").text(newLikeCount);
+        	      $("#unlikeBtn").show();
+        	      $("#likeBtn").hide();
+        	      console.log(data);
+        	    },
+        	    error: function(error) {
+            	  alert("請先登入");
+        	      console.log(error);
+        	    }
+        	  });
+        }
+
+        function unlike(){
+        	var formData = {
+        			loggedInUsername: $("#loggedInUsername").val(),
+            		AID: $("#AID").val()
+        		}
+        	event.preventDefault();
+        	 $.ajax({
+        		    type: "POST",
+        		    url: "/post/unlike",
+        		    data: JSON.stringify(formData),
+        		    processData: false,
+        		    contentType: "application/json;charset=UTF-8",
+        		    beforeSend: function(xhr) {
+        		        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+        		    },
+        		    success: function(data) {
+        		      var newLikeCount = parseInt($("#likeCount").text()) - 1;
+        		      $("#likeCount").text(newLikeCount);
+            	      $("#unlikeBtn").hide();
+            	      $("#likeBtn").show();
+            	      console.log(data);
+        		    },
+        		    error: function(error) {
+        		      console.log(error);
+        		    }
+        		  });
+        }
+
+        function getCommentTime() {
+        	function pad2(n) {
+        		  return n < 10 ? '0' + n : n;
+        		}
+        	  var now = new Date();
+        	  var formattedDate = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+        	  var formattedTime = pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+        	  var dateTimeString = formattedDate + ' ' + formattedTime;
+        	  return dateTimeString;
+        }
+        
+        function submitComment(){
+			var idx = $("#commentList li").length;
+
+			if($("#cMID").val() === ""){
+            	alert("請先登入");
+				return;
+            }
+            if($("#cContent").val() === ""){
+				alert("請輸入內容");
+				return;
+            } 
+			$("#cSubmitTime").val(getCommentTime());
+        	var formData = {
+                cContent: $("#cContent").val(),
+                cMID: $("#cMID").val(),
+                cSubmitTime: $("#cSubmitTime").val(),
+                cAID: $("#cAID").val()
+        	}
+        	event.preventDefault();
+        	$.ajax({
+        	    type: "POST",
+        	    url: "/post/saveComment",
+        	    data: JSON.stringify(formData),
+        	    processData: false,
+        	    contentType: "application/json;charset=UTF-8",
+        	    beforeSend: function(xhr) {
+        	        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+        	    },
+        	    success: function(data) {
+        	    	$("#cContent").val("");
+        	    	$("#commentList").append(`
+        	    	<li class="list-group-item list-group-item-success">
+	            	<div class="container-fluid">
+	            		<div class="row justify-content-between">
+	            		<div class="row col-3">
+	            			<img class="col-4 pb-3" src=`+ data["userPic"] +`>
+	            			<h4 class="cMName col-8">`+ data["userName"] +`</h4>
+	            		</div>
+	            		<div class="col-1">
+	            			<a class="cLikeBtn me-2" id=` + `cLikeBtn` + idx +` href=""><i class="fa-regular fa-heart fa-sm"></i></a>
+	            			<a class="cUnlikeBtn me-2" id=`+`cUnlikeBtn`+ idx +` href="" style="display:none"><i class="fa-solid fa-heart fa-sm"></i></a>
+	            			<small class="clikeCount" id=`+`clikeCount`+ idx +`>`+ 0 +`</small>
+	            		</div>
+	            		<div class="row">
+	            			<p class="cContent ms-5">`+ data["userComment"] +`</p>
+	            		</div>
+	            		</div>
+	            		<div class="row">
+	            			<small class="cTime">` + data["userCTime"] + `</small>
+	            		</div>
+	            	</div>
+	            	<input class="commentID" id=`+`commentID`+ idx +` value=`+ data["CID"] +`>
+	            	<input class="cMID" id=`+`cMID`+ idx +` value=`+ $("#cMID").val() +`>
+	            	<input class="ifCommentLiked" id=`+`ifCommentLiked`+ idx +` value="false">
+            	</li>`
+            	);
+            	location.reload();
+        	  },
+        	    error: function(error) {
+        	      console.log(error);
+        	    }
+        	  });
+        }
+        
+
+        function showOrHideBtnAboutLike(){
+			if($("#ifLiked").val() == "true"){
+				 $("#unlikeBtn").show();
+       	      	 $("#likeBtn").hide();
+			} else {
+        	      $("#unlikeBtn").hide();
+        	      $("#likeBtn").show();
+			}
+        }
+
+    
+        function likeComment(i){
+            console.log(i);
+           
+            
+        	var formData = {
+        		CID: $("#commentID"+i).val(),
+        		MID: $("#cMID"+i).val()
+        	}
+        	event.preventDefault();
+        	$.ajax({
+        	    type: "POST",
+        	    url: "/post/likeComment",
+        	    data: JSON.stringify(formData),
+        	    processData: false,
+        	    contentType: "application/json;charset=UTF-8",
+        	    beforeSend: function(xhr) {
+        	        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+        	    },
+        	    success: function(data) {
+        	      var newCLikeCount = parseInt($("#clikeCount"+i).text()) + 1;
+        	   
+              	 $("#ifCommentLiked"+i).val("true");
+              
+        	      $("#clikeCount"+i).text(newCLikeCount);
+        	      $("#cUnlikeBtn"+i).show();
+        	      $("#cLikeBtn"+i).hide();
+        	      console.log(data);
+        	    },
+        	    error: function(error) {
+            	  alert("請先登入");
+        	      console.log(error);
+        	    }
+        	  });
+        }
+
+      
+        function unlikeComment(i){
+        	var formData = {
+        			CID: $("#commentID" + i).val(),
+            		MID: $("#cMID" + i).val()
+        		}
+        	event.preventDefault();
+        	 $.ajax({
+        		    type: "POST",
+        		    url: "/post/unlikeComment",
+        		    data: JSON.stringify(formData),
+        		    processData: false,
+        		    contentType: "application/json;charset=UTF-8",
+        		    beforeSend: function(xhr) {
+        		        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+        		    },
+        		    success: function(data) {
+        		      var newCLikeCount = parseInt($("#clikeCount"+ i).text()) - 1;
+        		      $("#ifCommentLiked"+i).val("false");
+        		      $("#clikeCount"+i).text(newCLikeCount);
+            	      $("#cUnlikeBtn"+i).hide();
+            	      $("#cLikeBtn"+i).show();
+            	      console.log(data);
+        		    },
+        		    error: function(error) {
+        		      console.log(error);
+        		      alert("請先登入");
+        		    }
+        		  });
+        } 
+		
+		
+       
+        function showOrHideBtnAboutCommentLike(idx){
+        	
+            for(i = 0; i < idx; i++){
+                
+				if($("#ifCommentLiked"+i).val() == "true"){
+					 $("#cUnlikeBtn"+i).show();
+	       	      	 $("#cLikeBtn"+i).hide();
+				} else {
+	        	     $("#cUnlikeBtn"+i).hide();
+	        	     $("#cLikeBtn"+i).show();
+				}
+            }
+            
+        } 
+      
+     
+        function events(){
+        	var idx = $("#commentList li").length;
+        	showOrHideBtnAboutCommentLike(idx);
+        	showOrHideBtnAboutLike();
+           	$("#likeBtn").click(like);
+            $("#unlikeBtn").click(unlike);
+             for (var i = 0; i < idx; i++) {
+            	  (function(index) {
+            	    $("#cUnlikeBtn" + index).click(function() {
+            	      unlikeComment(index);
+            	    });
+            	    $("#cLikeBtn" + index).click(function() {
+            	      likeComment(index);
+            	    });
+            	  })(i);
+            	} 
+            $("#cSubmitBtn").click(submitComment);
+           
+         	CKEDITOR.replace('postInputContent1');
+        };
+
+        $(document).ready(events);
+    </script>   
+    </body>     
+</html>

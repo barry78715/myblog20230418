@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" th:href="@{/img/codingstray-website-favicon-color.png}"/>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+   
+    <script th:src="@{/js/jquery3.6.0.min.js}"></script>
+
+    <link rel="preconnect" th:href="@{https://fonts.googleapis.com}">
+    <link rel="preconnect" th:href="@{https://fonts.gstatic.com}" crossorigin>
+    <link th:href="@{https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300&family=Poppins:wght@300&display=swap}" rel="stylesheet">
+    <script th:src="@{https://kit.fontawesome.com/5748abe29e.js}" crossorigin="anonymous"></script>
+
+    <script th:src="@{/js/ckeditor/ckeditor.js}"></script>
+    <script src="../js/jquery3.6.0.min.js"></script>
+    <title th:text="${member.name}+'的主頁'"></title>
+    <style>
+    
+      a {
+  		cursor: pointer;
+	  }
+    
+	  .bg-green{
+          background-color: #a3e6c3;
+          box-shadow: 0px 3px 8px 0px #000;
+      }
+      .navbar {
+        min-height: 80px;
+      }
+      body {
+        background-color: #d8efe3;
+        padding-top: 65px; 
+        font-family: 'Noto Serif TC', serif;
+      }
+
+      ::placeholder {
+        color: gray !important;
+        opacity: .4;
+      }
+
+      :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: gray !important;
+      }
+
+      ::-ms-input-placeholder { /* Microsoft Edge */
+        color: gray !important;
+      }
+
+      .iconClass{
+        position: relative;
+      }
+
+      .iconClass span{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        display: block;
+      }
+      
+      .form-control-placeholder {
+        color: gray;
+      }
+
+      .dropdown-menu {
+        min-width: 300px;
+      }
+      .noteContent{
+        word-break:normal; 
+        width: 250px; 
+        display: block; 
+        white-space: pre-wrap;
+        word-wrap : break-word ;
+        overflow: hidden ;
+      }  
+      .note {
+        border-bottom: 1px solid rgb(180, 177, 177);
+      }
+
+      .searchBar {
+        position: relative;
+      }
+
+      #searchHintList {
+        position: absolute;
+        top: 35px;
+	  }
+      #text {
+           display: none;
+           position: absolute;
+           top: 40%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+      }
+      
+       footer {
+      	background-color: #eef5f2;
+      }
+    
+</style>
+</head>
+
+   
+
+<body>
+
+ <!-- navbar -->
+  <div class="container shadow-sm">
+  <nav class="navbar navbar-expand-md fixed-top navbar-light bg-green">
+    <div class="container-fluid">
+      <!-- brand name and icon -->
+      <a class="navbar-brand fs-3 text-success bd-highlight" th:href="@{/}">
+          <img th:src="@{/img/codingstray-website-favicon-color.png}" width="50" height="" class="d-inline">CODINGSTRAY
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <!-- search input and button -->
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <form class="searchBar d-flex mx-auto w-50">
+          <input class="searchInput form-control me-3" type="search" placeholder="搜尋..." aria-label="Search" id="searchKey" style="width: 100% !important;">
+          <ul class="dropdown-menu" id="searchHintList" style="width: 87% !important;">
+
+          </ul>
+          <button class="btn btn-success" type="submit"><i class="fas fa-search" style="padding-left: 10px; padding-right: 10px;"></i></button>
+        </form>
+
+        <ul class="navbar-nav ms-auto">
+          <!-- new post -->
+          <!-- sec:authorize="hasAuthority('ROLE_USER')"  -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="" id="newPost" class="nav-link nav-icon iconClass" data-bs-toggle="modal" data-bs-target="#postModal">
+              <i class="fa-solid fa-pen fa-2x"></i>
+              <input type="hidden" th:value="${_csrf.token}" name="${_csrf.parameterName}" th:if="${_csrf}" id="csrfTokenPic"/>
+            </a>
+          </li>
+
+          <!-- notification -->
+          <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item me-3 my-auto">
+            <a href="" class="nav-link nav-icon iconClass" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false" onclick="$('#notNum').remove();">
+              <i class="fas fa-bell fa-2x"></i>
+              <span id="notNum" class="badge rounded-pill bg-danger">2</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end w-30" aria-labelledby="dropdown01" id="noteList">
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man1.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg1</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+              <li style="display: flex; align-items: center;">
+                <img class="ms-2" src="./img/stick-man2.png" style="padding-top: 5px; width: 50px; height: auto;">
+                <a class="dropdown-item" href="#" style="flex: 1;">
+                  <span class="noteContent">sample msg2</span>
+                </a>
+                <a href="#" onclick=""><i class="far fa-trash-alt">&nbsp;&nbsp;</i>
+              </li>
+            </ul>
+          </li>
+          
+          <li class="nav-item dropdown me-3 my-auto">
+            <a href="" class="nav-link nav-icon iconClass" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+              <i class="fa-solid fa-user fa-2x"></i>
+            </a>
+           
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+  
+
+  <!-- Modal For New Post -->
+  <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postModalLabel">新文章</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form th:action="@{/saveArticle}" th:object="${article}" method="post">
+            <div class="mb-3">
+              <label for="postInputtag1" class="form-label">分類</label>
+              <select th:field="*{t.TID}" id="postTags" class="form-control form-control-placeholder" aria-label="postInputtag1">
+              	<option value="-1" selected hidden="true">請選擇分類</option>
+                <option th:each="tag: ${tl}" th:text="${tag.TName}" th:value="${tag.TID}" style="color:black"></option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="postInputtitle1" class="form-label">標題</label>
+              <input th:field="*{ATitle}" type="text" class="form-control" id="postInputtitle1">
+            </div>
+            <div class="mb-3">
+              <label for="postInputContent1" class="form-label">內文</label>
+              <textarea th:field="*{AContent}" class="form-control" id="postInputContent1" rows="7"></textarea>
+            </div>
+            <sec:input>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success mx-auto">發表文章</button>
+          </div>
+           </form>
+        </div>
+      </div>
+  </div>
+</div>
+
+
+
+<!-- offcanvas sidebar -->
+
+
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light offcanvas offcanvas-end" style="width: 280px;" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+    <span class="fs-4"></span>
+  </a>
+  <hr>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li sec:authorize="isAnonymous()"  class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-right-to-bracket fa-lg me-3"></i><span class="ms-1">登入</span>
+      </a>
+    </li>
+    <li sec:authorize="isAnonymous()" class="nav-item">
+      <a th:href="@{/register}" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-regular fa-id-card fa-lg me-3"></i><span>註冊</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a id="goMemberHP" th:href="@{'/memberHP/'+${userID}}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-house fa-lg me-3"></i><span>個人主頁</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a th:href="@{/login}" class="nav-link list-group-item-action list-group-item-success" aria-current="page">
+        <i class="fa-solid fa-clipboard fa-lg me-3 ms-1"></i><span class="ms-1">修改資料</span>
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_USER')" class="nav-item">
+      <a th:href="@{/logout}" class="nav-link list-group-item-action list-group-item-success">
+        <i class="fa-solid fa-right-from-bracket fa-lg me-3 ms-1"></i><span>登出</span>
+      </a>
+    </li>
+  </ul>
+  <hr>
+</div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12"><img class="w-100"src="https://i.seadn.io/gcs/files/c0a2753ba06416327a18b8a76d8c2afc.gif?auto=format&w=1920" alt="backgroundPic"></div>
+        </div>
+    </div>
+     <div class="container">
+        <div class="row" >
+            <div class="pic col-2 mt-2">
+                <img class="img-fluid rounded border border-3" th:src="${member.Pic}"> 
+            </div>
+            <div class="col-10">
+          		<div class="mt-5 row">            
+       				<h2 class="text-start ms-3 col-2" th:text="${member.name}"></h2>
+		   			<form class="col-8 d-inline">
+		   				<!-- <input type="text" id="loggedInUsername" th:value="${#authentication.name}"> -->
+		   				<input type="" id="loggedInUsername" th:value="${#authentication.name}">
+		   				<input type="" id="HPOwnerName" th:value="${member.username}">
+						<!-- <input type="text" id="HPOwnerName" th:value="${member.username}"> -->
+		   				<input type="" th:value="${_csrf.token}" name="_csrf" th:if="${_csrf}" id="csrfToken"/>
+		   				<input type="" th:value="${ifIsFollower}" id="ifIsFollower"/>
+		   				<button sec:authorize="hasAuthority('ROLE_USER')" id="followBtn" type="button" class="btn btn-success btn-lg me-5 col-2">追蹤</button>
+		   				<button id="unfollowBtn" type="button" class="btn btn-secondary btn-lg me-5 col-2">已追蹤</button>
+					</form>
+            	</div>
+            	<p class="ms-5 mt-4" th:text="${member.about}"></p>
+           	</div>
+    	 </div>
+    	 </div>
+    	 
+    	 
+    <div class="container">
+    
+         <div  class="row text-center " style="margin-top: 10px;">
+            <div class="col-4"><h4 style="color:#0d6efd"><p th:text="${postCount}"></p>貼文</h4></div>
+            <div class="col-4">
+	            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal">
+	   				<h4> <p id="followerCount" th:text="${Followed}"></p>粉絲</h4>
+	 			</button>
+ 			<!-- Modal -->
+ 				<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   				<div class="modal-dialog modal-dialog-centered">
+   			  	<div class="modal-content">
+   			    <div class="modal-header">
+    			     <h5 class="modal-title" id="exampleModalLabel">粉絲名單</h5>
+    			     <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    			</div>
+    			<div class="modal-body">
+    			 	<table class="table table-hover fs-3" id="followerList" th:each="name : ${FollowedList}">
+    			   		<tr>
+    			   			<td class="followerName" th:text="${name}"></td>
+    			   		</tr>
+ 					</table>
+    			</div>
+    			<div class="modal-footer"></div>
+	     		</div>
+	  			</div>
+	  			</div>
+	  		</div>
+	  	
+	  
+ 		
+   
+            <div class="col-4">
+	             <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+	   				<h4><p th:text="${Following}"></p>追蹤中</h4>
+	 			</button>
+ 			<!-- Modal -->
+ 				<div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+   				<div class="modal-dialog modal-dialog-centered">
+   			  	<div class="modal-content">
+   			    <div class="modal-header">
+    				<h5 class="modal-title" id="exampleModalLabel2">追蹤名單</h5>
+    			    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    			</div>
+    			<div class="modal-body">
+	    			<table class="table table-hover fs-3" th:each="name: ${FollowingList}">
+	    				<tr>
+	    			   		<td th:text="${name}"></td>
+	    			   	</tr>
+	 				</table>
+    			</div>
+    			<div class="modal-footer"></div>
+     			</div>
+	  			</div>
+	  			</div>
+	  		</div>
+	  	</div>
+	  </div>
+	 
+<div class="container">   
+<div class="row">
+    <div class="article col-4" th:each="article, status: ${articles}">
+        <!-- 加上判斷式 -->
+        <div class="mr-1 mt-4 bg-primary">
+       <!--  <div th:if="${article.M.id.equals(id) and article.AContent != null}" class="mr-1 mt-4 bg-primary"> -->
+            <div class="card" >
+            	<a th:href="@{'/post/'+${article.AID}}">
+                	<img th:src="${urlList[status.index]}" class="card-img-top" style="height:250px;width:406px">
+                </a>
+                <div class="card-body text-center">
+                   <h2><b><p th:text="${article.ATitle}"></p></b></h2> 
+                </div>
+                <div id="text" class="text-light" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                    <h2>
+                        <i class="fa-regular fa-heart fa-sm" style="color: #fafafa;" th:text="${article.ALike}"></i>
+                        <i class="fa-solid fa-eye fa-sm" style="color: #ffffff;" th:text="${article.AView}"></i>
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+ <footer class="navbar-fixed-bottom py-4 mt-4">
+    <div class="container-fluid">
+    <div class="d-flex justify-content-center">
+      <span class="text-muted">&copy; 2023 CODINGSTRAY, Inc</span>
+    </div>
+    </div>
+  </footer>
+
+<script>
+        $(function(){
+            $('.pic').mouseenter(function() {
+                $(this).css('transform', 'scale(1.2)');
+            });
+            $('.pic').mouseleave(function() {
+                $(this).css('transform', 'scale(1)');
+            });
+            $('.card').mouseover(function() {
+                $(this).find('#text').show();
+            }).mouseout(function() {
+                $(this).find('#text').hide();
+           	});
+        });
+        function showOrHideBtnAboutFollow(){
+			if($("#ifIsFollower").val() == "true"){
+				if($("#loggedInUsername").val() == $("#HPOwnerName").val()){
+				 	$("#unfollowBtn").hide();
+				}
+       	      	 $("#followBtn").hide();
+			} else {
+        	      $("#unfollowBtn").hide();
+        	      $("#followBtn").show();
+			}
+        }
+
+function Follow(){
+	var formData = {
+		loggedInUsername: $("#loggedInUsername").val(),
+		HPOwnerName: $("#HPOwnerName").val()
+	}
+	event.preventDefault();
+	$.ajax({
+	    type: "POST",
+	    url: "/memberHP/follow",
+	    data: JSON.stringify(formData),
+	    processData: false,
+	    contentType: "application/json;charset=UTF-8",
+	    beforeSend: function(xhr) {
+	        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+	    },
+	    success: function(data) {
+	      $("#followerList").append("<tr><td class='followerName'>"+$("#loggedInUsername").val()+"</tr></td>");
+	      var newFollowerCount = parseInt($("#followerCount").text()) + 1;
+	      $("#followerCount").text(newFollowerCount);
+	      $("#followBtn").hide();
+	      $("#unfollowBtn").show();
+	      console.log(data);
+	    },
+	    error: function(error) {
+	      console.log(error);
+	    }
+	  });
+}
+
+function Unfollow(){
+	var formData = {
+			loggedInUsername: $("#loggedInUsername").val(),
+			HPOwnerName: $("#HPOwnerName").val()
+		}
+	event.preventDefault();
+	 $.ajax({
+		    type: "POST",
+		    url: "/memberHP/unfollow",
+		    data: JSON.stringify(formData),
+		    processData: false,
+		    contentType: "application/json;charset=UTF-8",
+		    beforeSend: function(xhr) {
+		        xhr.setRequestHeader('X-CSRF-TOKEN', $("#csrfToken").val());
+		    },
+		    success: function(data) {
+		      console.log(data);
+		      $(".followerName").each(function() {
+		    	    if ($(this).html() == $("#loggedInUsername").val()) {
+		    	      $(this).remove();
+		    	    }
+		      });
+		      var newFollowerCount = parseInt($("#followerCount").text()) - 1;
+		      $("#followerCount").text(newFollowerCount);
+    	      $("#unfollowBtn").hide();
+    	      $("#followBtn").show();
+		    },
+		    error: function(error) {
+		      console.log(error);
+		    }
+		  });
+}
+
+function events(){
+    CKEDITOR.replace('postInputContent1');
+    showOrHideBtnAboutFollow();
+    $("#followBtn").click(Follow);
+    $("#unfollowBtn").click(Unfollow);
+};
+
+$(document).ready(events);
+
+
+</script>
+</body>
+</html>
